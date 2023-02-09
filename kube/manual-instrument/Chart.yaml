@@ -1,0 +1,10 @@
+apiVersion: v2
+name: http-api
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+
+dependencies:
+  - name: http-api
+    version: 0.5.2
+    repository: https://tech-inf.k8s.empire.ca/internal/apps-prod/empire-helm

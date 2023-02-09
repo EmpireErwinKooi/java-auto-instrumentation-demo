@@ -1,0 +1,79 @@
+http-api:
+  appVersion: "1.7.1"
+  image:
+    repository: "docker.io/empirelife/java-demo"
+    pullPolicy: Always
+
+  commonAnnotations:
+    admission.datadoghq.com/java-lib.version: "v1.4.0"
+
+  commonLabels:
+    admission.datadoghq.com/enabled: "true"
+    tags.datadoghq.com/env: "dev"
+
+  envData:
+    - name: JAVA_TOOL_OPTIONS
+      value: "-Xms64m -Xmx512m"
+    - name: OTEL_SERVICE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: "metadata.labels['app.kubernetes.io/name']"
+    - name: OTEL_SERVICE_VERSION
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: "metadata.labels['app.kubernetes.io/version']"
+
+    - name: OTEL_SERVICE_NAMESPACE
+      value: java-demo
+
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: http://opentelemetry-opentelemetry-collector.tracing:4317
+
+    - name: OTEL_RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT
+      value: dev
+
+    - name: OTEL_INSTRUMENT
+      value: manual
+
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: service.version=$(OTEL_SERVICE_VERSION)
+
+    - name: DD_SERVICE
+      value: $(OTEL_SERVICE_NAME)
+
+    - name: DD_VERSION
+      value: $(OTEL_SERVICE_VERSION)
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 2m
+      memory: 1Mi
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  autoscaling:
+      enabled: false
+  readinessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 60
+    tcpSocket:
+      port: 8080
+  livenessProbe:
+    initialDelaySeconds: 120
+    failureThreshold: 3
+    periodSeconds: 60
+    timeoutSeconds: 60
+    tcpSocket:
+      port: 8080
+  requiredAnnotations:
+    ownerEmail: erwin.kooi@empire.ca
+    businessUnit: prod-support

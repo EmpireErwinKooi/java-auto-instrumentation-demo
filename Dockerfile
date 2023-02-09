@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY ./src/ /app/src/
 COPY build.gradle /app/
+COPY gradle.properties /app/
 RUN gradle bootJar
 
 FROM eclipse-temurin:17-jre
@@ -13,4 +14,5 @@ ENV TZ="America/Toronto"
 
 COPY --from=build /app/build/libs/*.jar /app/spring-boot-application.jar
 
+EXPOSE 8080
 CMD ["java", "-jar", "/app/spring-boot-application.jar"]
